@@ -15,7 +15,7 @@ stages:
   is_completed: true
 - id: 573
   step: 9622
-  is_completed: false
+  is_completed: true
 topics:
   0:
   - title: Intro to computational thinking

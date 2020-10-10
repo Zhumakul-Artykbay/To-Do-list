@@ -27,11 +27,13 @@ while is_running:
 1) Today's tasks
 2) Week's tasks
 3) All tasks
-4) Add task
+4) Missed tasks
+5) Add task
+6) Delete task
 0) Exit
 """)
     choose_action = input()
-
+    today = datetime.today()
     if choose_action == '1':
         today = datetime.today()
         rows = session.query(Table).filter(Table.deadline == today.date()).all()
@@ -42,7 +44,6 @@ while is_running:
         else:
             print("Nothing to do!")
     elif choose_action == '2':
-        today = datetime.today()
         last_day = today + timedelta(days=7)
         week_tasks = session.query(Table).filter(Table.deadline >=today.date(),Table.deadline <= last_day.date()).order_by(Table.deadline).all()
         week_days = {0: "Monday", 1: "Tuesday", 2: "Wednesday", 3: "Thursday", 4: "Friday", 5: "Saturday", 6: "Sunday"}
@@ -64,6 +65,16 @@ while is_running:
             print(f"{cnt}. {task.task}. {task.deadline.day} {task.deadline.strftime('%b')}")
             cnt += 1
     elif choose_action == '4':
+        print("Missed tasks:")
+        missed_tasks = session.query(Table).filter(Table.deadline < today.date()).order_by(Table.deadline).all()
+        if(len(missed_tasks) > 0):
+            cnt = 1
+            for task in missed_tasks:
+                print(f"{cnt}. {task.task}. {task.deadline.day} {task.deadline.strftime('%b')} ")
+                cnt += 1
+        else:
+            print("Nothing is missed!")
+    elif choose_action == '5':
         print("Enter task")
         add_task = input()
         print("Enter deadline")
@@ -72,6 +83,22 @@ while is_running:
         session.add(new_row)
         session.commit()
         print("The task has been added!")
+    elif choose_action == '6':
+        tasks_to_delete = session.query(Table).order_by(Table.deadline).all()
+        if(len(tasks_to_delete) > 0):
+            print("Choose the number of the task you want to delete:")
+            cnt = 1
+            for task in tasks_to_delete:
+                print(f"{cnt}. {task.task}. {task.deadline.day} {task.deadline.strftime('%b')} ")
+                cnt += 1
+            number_of_task = int(input())
+            specific_row = tasks_to_delete[number_of_task-1]
+            session.delete(specific_row)
+            session.commit()
+            print("The task has been deleted!")
+        else:
+            print("Nothing to delete")
+
     elif choose_action == '0':
         is_running = False
 print("Bye!")
